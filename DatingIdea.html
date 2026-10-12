@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tenho uma pergunta pra você 💌</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffe6df;
+    --card: #fff7f3;
+    --ink: #3b1030;
+    --muted: #7a4a6b;
+    --rose: #ff3d77;
+    --rose-ink: #ffffff;
+    --lilac: #cdbcff;
+    --line: #f2c4c9;
+    --display: "Bagel Fat One", "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;
+    --body: "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #260b28; --card: #3a1740; --ink: #ffe9ef; --muted: #d9aecb; --lilac: #7e66d6; --line: #5a2a5e;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #260b28; --card: #3a1740; --ink: #ffe9ef; --muted: #d9aecb; --lilac: #7e66d6; --line: #5a2a5e;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); height: 100%; }
+  *, *::before, *::after { box-sizing: inherit; }
+  body {
+    margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: var(--body); font-size: 1.05rem; line-height: 1.5;
+    overflow-x: hidden;
+  }
+  main {
+    min-height: 100%; display: flex; align-items: center; justify-content: center;
+    padding: 24px 18px;
+  }
+  .step { display: none; width: 100%; max-width: 520px; text-align: center; }
+  .step.active { display: block; animation: pop .45s cubic-bezier(.2,.9,.3,1.2); }
+  @keyframes pop { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: none; } }
+
+  h1, h2 { font-family: var(--display); font-weight: 400; line-height: 1.08; margin: 0 0 14px; letter-spacing: .01em; }
+  h1 { font-size: clamp(2.3rem, 9vw, 3.4rem); }
+  h2 { font-size: clamp(1.8rem, 7vw, 2.5rem); }
+  p { margin: 0 0 14px; }
+  .muted { color: var(--muted); }
+  .big-emoji { font-size: 4.2rem; line-height: 1; margin-bottom: 10px; display: inline-block; animation: beat 1.3s ease-in-out infinite; }
+  @keyframes beat { 0%,100% { transform: scale(1); } 15% { transform: scale(1.18); } 30% { transform: scale(1); } 45% { transform: scale(1.12); } }
+
+  .btn {
+    font-family: var(--body); font-weight: 800; font-size: 1.1rem; cursor: pointer;
+    border: 0; border-radius: 999px; padding: 14px 28px; margin: 6px;
+    background: var(--rose); color: var(--rose-ink);
+    box-shadow: 0 6px 0 rgba(160, 20, 70, .35);
+    transition: transform .12s ease, box-shadow .12s ease, opacity .2s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(160, 20, 70, .35); }
+  .btn:focus-visible, .opt:focus-visible, .clause:focus-within { outline: 3px solid var(--ink); outline-offset: 3px; }
+  .btn[disabled] { opacity: .45; cursor: not-allowed; transform: none; }
+  .btn.ghost { background: var(--card); color: var(--ink); box-shadow: 0 6px 0 var(--line); border: 2px solid var(--line); }
+
+  /* quiz + opções */
+  .progress { display: flex; gap: 8px; justify-content: center; margin-bottom: 22px; }
+  .progress i { width: 34px; height: 8px; border-radius: 99px; background: var(--line); transition: background .3s; }
+  .progress i.on { background: var(--rose); }
+  .opts { display: grid; gap: 10px; margin: 18px 0 8px; }
+  .opt {
+    font-family: var(--body); font-weight: 700; font-size: 1.05rem; text-align: left; cursor: pointer;
+    background: var(--card); color: var(--ink); border: 2px solid var(--line); border-radius: 18px; padding: 14px 18px;
+    transition: transform .12s, border-color .12s, background .12s;
+  }
+  .opt:hover { transform: translateX(4px); border-color: var(--rose); }
+  .opt.sel { border-color: var(--rose); background: var(--rose); color: var(--rose-ink); }
+  .reaction { min-height: 3em; font-weight: 800; color: var(--rose); margin-top: 14px; }
+
+  /* pergunta principal */
+  .ask-actions { position: relative; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; margin-top: 26px; min-height: 90px; }
+  #yes { font-size: 1.2rem; padding: 14px 34px; transition: font-size .2s, padding .2s, transform .12s, box-shadow .12s; }
+  #no { background: var(--lilac); color: var(--ink); box-shadow: 0 6px 0 rgba(60, 30, 140, .25); z-index: 20; white-space: nowrap; touch-action: none; transition: left .25s cubic-bezier(.2,.9,.3,1.1), top .25s cubic-bezier(.2,.9,.3,1.1); }
+  .hint { margin-top: 18px; font-size: .95rem; color: var(--muted); min-height: 1.5em; }
+
+  /* contrato */
+  .paper { background: var(--card); border: 2px solid var(--line); border-radius: 22px; padding: 22px 18px; text-align: left; }
+  .paper h2 { text-align: center; font-size: 1.7rem; }
+  .clause { display: flex; gap: 12px; align-items: flex-start; padding: 10px 6px; border-bottom: 1px dashed var(--line); cursor: pointer; border-radius: 10px; }
+  .clause:last-of-type { border-bottom: 0; }
+  .clause input { width: 24px; height: 24px; margin-top: 2px; accent-color: var(--rose); flex: none; }
+  .sign-label { margin: 16px 0 6px; font-weight: 800; }
+  .sign-wrap { position: relative; border: 2px dashed var(--rose); border-radius: 16px; background: var(--bg); }
+  #sig { display: block; width: 100%; height: 130px; touch-action: none; border-radius: 14px; }
+  .sign-hint { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); pointer-events: none; font-weight: 600; }
+  .sign-wrap.signed .sign-hint { display: none; }
+  .sign-tools { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .linkbtn { background: none; border: 0; color: var(--muted); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 6px; }
+
+  /* certificado */
+  .cert { background: var(--card); border: 3px double var(--rose); border-radius: 22px; padding: 30px 20px; }
+  .cert .names { font-family: var(--display); font-size: clamp(1.8rem, 8vw, 2.6rem); line-height: 1.1; margin: 10px 0; }
+  .cert .amp { color: var(--rose); }
+  .cert dl { margin: 18px 0 0; display: grid; gap: 10px; }
+  .cert dt { font-weight: 800; color: var(--muted); font-size: .9rem; }
+  .cert dd { margin: 0; font-weight: 800; font-size: 1.1rem; }
+  .seal { display: inline-grid; place-items: center; width: 74px; height: 74px; border-radius: 50%; background: var(--rose); color: var(--rose-ink); font-size: 2rem; box-shadow: 0 6px 0 rgba(160,20,70,.3); transform: rotate(-8deg); margin-top: 18px; }
+
+  #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+  @media (prefers-reduced-motion: reduce) {
+    .big-emoji { animation: none; }
+    .step.active { animation: none; }
+    #no { transition: none; }
+  }
+</style>
+</head>
+<body>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<main>
+
+  <!-- 1. Intro -->
+  <section class="step active" id="s-intro">
+    <div class="big-emoji" aria-hidden="true">💌</div>
+    <h1>Oi, <span data-para></span>!</h1>
+    <p class="muted">Eu fiz esse site só pra você. Tem uma pergunta importante no final, mas antes preciso te fazer uns testes rápidos.</p>
+    <button class="btn" id="start">Tô pronta, manda 👀</button>
+  </section>
+
+  <!-- 2. Quiz -->
+  <section class="step" id="s-quiz">
+    <div class="progress" id="qprog"></div>
+    <h2 id="qtitle"></h2>
+    <div class="opts" id="qopts"></div>
+    <div class="reaction" id="qreact" aria-live="polite"></div>
+  </section>
+
+  <!-- 3. A pergunta -->
+  <section class="step" id="s-ask">
+    <div class="big-emoji" aria-hidden="true">🥹</div>
+    <h1><span data-para></span>, você aceita namorar comigo?</h1>
+    <p class="muted">Pensa com carinho. Mas não muito.</p>
+    <div class="ask-actions" id="actions">
+      <button class="btn" id="yes">Sim! 💖</button>
+      <button class="btn" id="no" aria-label="Não">Não</button>
+    </div>
+    <div class="hint" id="hint" aria-live="polite"></div>
+  </section>
+
+  <!-- 4. Ela disse sim -->
+  <section class="step" id="s-yes">
+    <div class="big-emoji" aria-hidden="true">🎉</div>
+    <h1>ELA DISSE SIM!!!</h1>
+    <p>Eu sabia! (Na verdade eu tava morrendo de nervoso.) Agora só faltam umas formalidades, porque namoro sério tem papelada. 😎</p>
+    <button class="btn" id="to-contract">Bora pra papelada 📜</button>
+  </section>
+
+  <!-- 5. Contrato -->
+  <section class="step" id="s-contract">
+    <div class="paper">
+      <h2>Contrato oficial de namoro</h2>
+      <p class="muted" style="text-align:center">Marque tudo e assine embaixo pra valer.</p>
+      <label class="clause"><input type="checkbox"><span>Vou dar bom dia e boa noite, mesmo com sono.</span></label>
+      <label class="clause"><input type="checkbox"><span>Vou dividir a comida, menos a última batata frita (negociável).</span></label>
+      <label class="clause"><input type="checkbox"><span>Abraço sempre que alguém pedir. Sem multa.</span></label>
+      <label class="clause"><input type="checkbox"><span>Vou assistir uma série ruim junto sem reclamar.</span></label>
+      <label class="clause"><input type="checkbox"><span>Vou aceitar que ele é meio bobo às vezes, e amar do mesmo jeito.</span></label>
+      <div class="sign-label">Assinatura:</div>
+      <div class="sign-wrap" id="signwrap">
+        <canvas id="sig" aria-label="Espaço para assinar com o dedo ou mouse"></canvas>
+        <div class="sign-hint">Assine aqui com o dedo ✍️</div>
+      </div>
+      <div class="sign-tools"><button class="linkbtn" id="clear">Limpar</button></div>
+    </div>
+    <button class="btn" id="sign-ok" disabled style="margin-top:16px">Assinar e oficializar</button>
+  </section>
+
+  <!-- 6. Primeiro date -->
+  <section class="step" id="s-date">
+    <div class="big-emoji" aria-hidden="true">🌹</div>
+    <h2>Agora escolhe nosso primeiro date como casal</h2>
+    <div class="opts" id="dopts"></div>
+    <button class="btn" id="date-ok" disabled>Fechado!</button>
+  </section>
+
+  <!-- 7. Certificado -->
+  <section class="step" id="s-cert">
+    <div class="cert">
+      <div aria-hidden="true">💞</div>
+      <h2>Certificado de namoro</h2>
+      <div class="names"><span data-de></span> <span class="amp">&amp;</span> <span data-para></span></div>
+      <p class="muted">Agora é oficial. Sem devolução.</p>
+      <dl>
+        <div><dt>Oficializado em</dt><dd id="c-date"></dd></div>
+        <div><dt>Primeiro date</dt><dd id="c-date-pick"></dd></div>
+        <div><dt>Status</dt><dd>Namorando e muito feliz 💖</dd></div>
+      </dl>
+      <div class="seal" aria-hidden="true">✔</div>
+    </div>
+    <p class="muted" style="margin-top:18px">Dica: tira um print desse certificado pra guardar.</p>
+    <button class="btn" id="copy">Copiar mensagem pra ele 📋</button>
+    <button class="btn ghost" id="again">Mais confete 🎊</button>
+  </section>
+
+  <!-- 8. Mensagem copiada -->
+  <section class="step" id="s-copied">
+    <div class="big-emoji" aria-hidden="true">💬</div>
+    <h1>Cole no nosso chat a mensagem que foi copiada.</h1>
+    <div id="fallback" hidden>
+      <p class="muted">Não consegui copiar sozinho, então copia a mensagem aqui:</p>
+      <div id="fallbackmsg" class="paper" style="white-space:pre-wrap;user-select:all;-webkit-user-select:all"></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  // ====== PERSONALIZE AQUI (ou use ?de=Lucas&para=Ana no link) ======
+  var CONFIG = { de: "Raphael", para: "Samantha" };
+  // ==================================================================
+
+  var params = new URLSearchParams(location.search);
+  var DE = (params.get("de") || CONFIG.de).slice(0, 30);
+  var PARA = (params.get("para") || CONFIG.para).slice(0, 30);
+  document.querySelectorAll("[data-de]").forEach(function (n) { n.textContent = DE; });
+  document.querySelectorAll("[data-para]").forEach(function (n) { n.textContent = PARA; });
+  document.title = "Tenho uma pergunta pra você, " + PARA + " 💌";
+
+  var $ = function (s) { return document.querySelector(s); };
+  var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function go(id) {
+    document.querySelectorAll(".step").forEach(function (s) { s.classList.remove("active"); });
+    $("#s-" + id).classList.add("active");
+    window.scrollTo(0, 0);
+  }
+
+  // ---------- Confete ----------
+  var cv = $("#confetti"), cx = cv.getContext("2d"), parts = [], raf = null;
+  function fit() { cv.width = innerWidth * devicePixelRatio; cv.height = innerHeight * devicePixelRatio; }
+  fit(); addEventListener("resize", fit);
+  function confetti(n) {
+    var colors = ["#ff3d77", "#ffb199", "#cdbcff", "#ffd166", "#ffffff", "#ff7aa8"];
+    n = reduce ? Math.min(n, 40) : n;
+    for (var i = 0; i < n; i++) {
+      parts.push({
+        x: Math.random() * cv.width, y: -20 * devicePixelRatio - Math.random() * cv.height * .4,
+        vx: (Math.random() - .5) * 5 * devicePixelRatio, vy: (2 + Math.random() * 4) * devicePixelRatio,
+        s: (6 + Math.random() * 8) * devicePixelRatio, r: Math.random() * 6, vr: (Math.random() - .5) * .3,
+        c: colors[(Math.random() * colors.length) | 0], heart: Math.random() < .3
+      });
+    }
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+  function tick() {
+    cx.clearRect(0, 0, cv.width, cv.height);
+    parts.forEach(function (p) {
+      p.x += p.vx; p.y += p.vy; p.vy += .04 * devicePixelRatio; p.r += p.vr;
+      cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r); cx.fillStyle = p.c;
+      if (p.heart) { cx.font = p.s * 1.6 + "px serif"; cx.fillText("💖", -p.s, p.s); }
+      else cx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2);
+      cx.restore();
+    });
+    parts = parts.filter(function (p) { return p.y < cv.height + 40; });
+    if (parts.length) raf = requestAnimationFrame(tick);
+    else { raf = null; cx.clearRect(0, 0, cv.width, cv.height); }
+  }
+
+  // ---------- 1 -> 2 : Quiz ----------
+  var QUIZ = [
+    { q: "Quem é a pessoa mais linda deste site?", o: [
+      ["Eu, obviamente 💅", "Resposta certa. Mas ele também acha que é ele 😂"],
+      ["Ele (modéstia à parte)", "Humildade é uma qualidade. Anotado."] ] },
+    { q: "Num date, o que não pode faltar?", o: [
+      ["Pizza 🍕", "Ótima escolha. Já tô com fome."],
+      ["Hambúrguer 🍔", "Gosto refinado. Aprovado."],
+      ["Sushi 🍣", "Sushi num date? Pedido anotado, já tô com vontade."],
+      ["Todos, sem julgamentos", "Essa é a minha pessoa!"] ] },
+    { q: "Quantos beijos por dia é o ideal?", o: [
+      ["Alguns", "Hmm, a gente conversa sobre isso."],
+      ["Vários", "Boa média, gostei."],
+      ["Infinitos", "Compatibilidade de 100%! 🎉"] ] }
+  ];
+  var qi = 0, locked = false;
+  function renderQ() {
+    var Q = QUIZ[qi]; locked = false;
+    $("#qprog").innerHTML = QUIZ.map(function (_, i) { return '<i class="' + (i <= qi ? "on" : "") + '"></i>'; }).join("");
+    $("#qtitle").textContent = Q.q;
+    $("#qreact").textContent = "";
+    var box = $("#qopts"); box.innerHTML = "";
+    Q.o.forEach(function (op) {
+      var b = document.createElement("button");
+      b.className = "opt"; b.textContent = op[0];
+      b.onclick = function () {
+        if (locked) return; locked = true; b.classList.add("sel");
+        $("#qreact").textContent = op[1];
+        setTimeout(function () { qi++; if (qi < QUIZ.length) renderQ(); else go("ask"); }, 1400);
+      };
+      box.appendChild(b);
+    });
+  }
+  $("#start").onclick = function () { qi = 0; renderQ(); go("quiz"); };
+
+  // ---------- 3 : Botão do NÃO fujão ----------
+  var yes = $("#yes"), no = $("#no"), hint = $("#hint");
+  var NO_TEXTS = ["Não", "Tem certeza?", "Pensa bem...", "Olha o coraçãozinho dele 💔", "Última chance!", "Sério mesmo?", "Tá difícil clicar, né?", "Clica no Sim, vai 🥺", "Desiste 😌"];
+  var HINTS = ["", "Ué, o botão tá meio tímido hoje.", "Ele não quer ser clicado, sabia?", "Dica: o Sim é bem maior e mais fácil.", "Você é teimosa, e eu gosto disso.", "Tentando de novo? Você tem energia!", "Já passou da hora de apertar o Sim 😄"];
+  var tries = 0, ph = null, lastDodge = 0;
+
+  function dodge() {
+    var now = Date.now(); if (now - lastDodge < 180) return; lastDodge = now;
+    if (!ph) {
+      var r0 = no.getBoundingClientRect();
+      ph = document.createElement("span");
+      ph.style.cssText = "display:inline-block;width:" + r0.width + "px;height:" + r0.height + "px;margin:6px";
+      no.parentNode.insertBefore(ph, no);
+      no.style.position = "fixed";
+      no.style.left = r0.left + "px"; no.style.top = r0.top + "px"; no.style.margin = "0";
+    }
+    tries++;
+    no.textContent = NO_TEXTS[Math.min(tries, NO_TEXTS.length - 1)];
+    hint.textContent = HINTS[Math.min(tries, HINTS.length - 1)];
+    var k = Math.min(tries, 10);
+    yes.style.fontSize = (1.2 + k * 0.14) + "rem";
+    yes.style.padding = (14 + k * 2) + "px " + (34 + k * 5) + "px";
+
+    var w = no.offsetWidth, h = no.offsetHeight, vw = innerWidth, vh = innerHeight;
+    var yr = yes.getBoundingClientRect(), cur = no.getBoundingClientRect();
+    var cx0 = cur.left + w / 2, cy0 = cur.top + h / 2, best = null;
+    for (var i = 0; i < 60; i++) {
+      var x = 12 + Math.random() * Math.max(0, vw - w - 24);
+      var y = 60 + Math.random() * Math.max(0, vh - h - 90);
+      var hitsYes = x < yr.right + 14 && x + w > yr.left - 14 && y < yr.bottom + 14 && y + h > yr.top - 14;
+      var far = Math.hypot(x + w / 2 - cx0, y + h / 2 - cy0) > 140;
+      if (!hitsYes && far) { best = [x, y]; break; }
+      if (!hitsYes && !best) best = [x, y];
+    }
+    if (best) { no.style.left = best[0] + "px"; no.style.top = best[1] + "px"; }
+  }
+  ["pointerenter", "pointerdown", "click"].forEach(function (ev) {
+    no.addEventListener(ev, function (e) { e.preventDefault(); dodge(); });
+  });
+  no.addEventListener("touchstart", function (e) { e.preventDefault(); dodge(); }, { passive: false });
+  addEventListener("resize", function () {
+    if (!ph) return;
+    var r = no.getBoundingClientRect();
+    no.style.left = Math.min(r.left, innerWidth - r.width - 8) + "px";
+    no.style.top = Math.min(r.top, innerHeight - r.height - 8) + "px";
+  });
+
+  yes.onclick = function () {
+    no.style.display = "none"; if (ph) ph.style.display = "none";
+    go("yes"); confetti(220);
+    setTimeout(function () { confetti(120); }, 900);
+  };
+  $("#to-contract").onclick = function () { go("contract"); sizeSig(); };
+
+  // ---------- 5 : Contrato + assinatura ----------
+  var sig = $("#sig"), sc = sig.getContext("2d"), drawing = false, signed = false;
+  function sizeSig() {
+    var r = sig.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+    sig.width = Math.max(1, Math.round(r.width * d));
+    sig.height = Math.max(1, Math.round(r.height * d));
+    sc.setTransform(d, 0, 0, d, 0, 0);
+    sc.lineWidth = 3; sc.lineCap = "round"; sc.lineJoin = "round";
+    sc.strokeStyle = getComputedStyle(document.body).color;
+    signed = false; $("#signwrap").classList.remove("signed"); check();
+  }
+  function pos(e) { var r = sig.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+  sig.addEventListener("pointerdown", function (e) {
+    drawing = true; sig.setPointerCapture(e.pointerId);
+    var p = pos(e); sc.beginPath(); sc.moveTo(p[0], p[1]); sc.lineTo(p[0] + .1, p[1] + .1); sc.stroke();
+  });
+  sig.addEventListener("pointermove", function (e) {
+    if (!drawing) return; var p = pos(e); sc.lineTo(p[0], p[1]); sc.stroke();
+    if (!signed) { signed = true; $("#signwrap").classList.add("signed"); check(); }
+  });
+  ["pointerup", "pointercancel"].forEach(function (ev) { sig.addEventListener(ev, function () { drawing = false; }); });
+  $("#clear").onclick = sizeSig;
+  var boxes = document.querySelectorAll(".clause input");
+  boxes.forEach(function (b) { b.addEventListener("change", check); });
+  function check() {
+    var all = Array.prototype.every.call(boxes, function (b) { return b.checked; });
+    $("#sign-ok").disabled = !(all && signed);
+  }
+  $("#sign-ok").onclick = function () { go("date"); confetti(80); };
+
+  // ---------- 6 : Primeiro date ----------
+  var DATES = ["Jantar à luz de velas 🕯️", "Cinema com pipoca 🍿", "Piquenique no pôr do sol 🌅", "Sorvete e caminhada 🍦"];
+  var pick = null, copyMsg = "";
+  DATES.forEach(function (d) {
+    var b = document.createElement("button");
+    b.className = "opt"; b.textContent = d;
+    b.onclick = function () {
+      document.querySelectorAll("#dopts .opt").forEach(function (x) { x.classList.remove("sel"); });
+      b.classList.add("sel"); pick = d; $("#date-ok").disabled = false;
+    };
+    $("#dopts").appendChild(b);
+  });
+  $("#date-ok").onclick = function () {
+    $("#c-date").textContent = new Date().toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" });
+    $("#c-date-pick").textContent = pick;
+    var msg = "Oi, " + DE + "! Eu aceitei! 💖 Contrato assinado e primeiro date marcado: " + pick + ". Já pode se preparar, meu namorado! 😘 — " + PARA;
+    copyMsg = msg;
+    go("cert"); confetti(260);
+  };
+  $("#again").onclick = function () { confetti(260); };
+
+  // ---------- 7 : Copiar mensagem ----------
+  function legacyCopy(t) {
+    try {
+      var ta = document.createElement("textarea");
+      ta.value = t; ta.setAttribute("readonly", "");
+      ta.style.cssText = "position:fixed;left:-9999px;top:0;opacity:0";
+      document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, t.length);
+      var ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return ok;
+    } catch (e) { return false; }
+  }
+  function copyText(t) {
+    if (!t) return Promise.resolve(false);
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(t).then(function () { return true; }, function () { return legacyCopy(t); });
+    }
+    return Promise.resolve(legacyCopy(t));
+  }
+  $("#copy").onclick = function () {
+    var b = this; b.disabled = true;
+    copyText(copyMsg).then(function (ok) {
+      if (ok) {
+        b.textContent = "Copiado para a área de transferência ✅";
+        setTimeout(function () { go("copied"); confetti(120); }, 1200);
+      } else {
+        $("#fallback").hidden = false;
+        $("#fallbackmsg").textContent = copyMsg;
+        go("copied");
+      }
+    });
+  };
+})();
+</script>
+</body>
+</html>
