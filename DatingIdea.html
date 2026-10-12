@@ -67,6 +67,25 @@
   .btn[disabled] { opacity: .45; cursor: not-allowed; transform: none; }
   .btn.ghost { background: var(--card); color: var(--ink); box-shadow: 0 6px 0 var(--line); border: 2px solid var(--line); }
 
+  .love-tag {
+    display: inline-block; margin-bottom: 10px; padding: 7px 12px; border-radius: 999px;
+    background: rgba(255, 61, 119, .08); border: 1px solid var(--line); color: var(--rose);
+    font-size: .82rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+  }
+  .float-hearts {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  .float-hearts span {
+    position: absolute; bottom: -40px; font-size: clamp(1.1rem, 2vw, 1.8rem);
+    animation: floatUp 12s linear infinite;
+    opacity: .7;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(0) scale(.9) rotate(0deg); opacity: 0; }
+    15% { opacity: .75; }
+    100% { transform: translateY(-110vh) scale(1.15) rotate(8deg); opacity: 0; }
+  }
+
   /* quiz + opções */
   .progress { display: flex; gap: 8px; justify-content: center; margin-bottom: 22px; }
   .progress i { width: 34px; height: 8px; border-radius: 99px; background: var(--line); transition: background .3s; }
@@ -119,14 +138,23 @@
 </style>
 </head>
 <body>
+<div class="float-hearts" aria-hidden="true">
+  <span style="left: 8%; animation-delay: .3s;">💗</span>
+  <span style="left: 22%; animation-delay: 1.5s;">💖</span>
+  <span style="left: 40%; animation-delay: 2.4s;">✨</span>
+  <span style="left: 58%; animation-delay: .9s;">💞</span>
+  <span style="left: 74%; animation-delay: 1.8s;">💘</span>
+  <span style="left: 88%; animation-delay: 3.1s;">💗</span>
+</div>
 <canvas id="confetti" aria-hidden="true"></canvas>
 <main>
 
   <!-- 1. Intro -->
   <section class="step active" id="s-intro">
     <div class="big-emoji" aria-hidden="true">💌</div>
+    <div class="love-tag">Mensagem reservada</div>
     <h1>Oi, <span data-para></span>!</h1>
-    <p class="muted">Eu fiz esse site só pra você. Tem uma pergunta importante no final, mas antes preciso te fazer uns testes rápidos.</p>
+    <p class="muted">Eu fiz esse site só pra você. Tem uma pergunta importante no final, mas antes preciso te fazer uns testes rápidos — porque você é a pessoa que me faz sorrir mais fácil. 💖</p>
     <button class="btn" id="start">Tô pronta, manda 👀</button>
   </section>
 
@@ -153,8 +181,9 @@
   <!-- 4. Ela disse sim -->
   <section class="step" id="s-yes">
     <div class="big-emoji" aria-hidden="true">🎉</div>
+    <div class="love-tag">Atenção: coração confirmado</div>
     <h1>ELA DISSE SIM!!!</h1>
-    <p>Eu sabia! (Na verdade eu tava morrendo de nervoso.) Agora só faltam umas formalidades, porque namoro sério tem papelada. 😎</p>
+    <p>Eu sabia! (Na verdade eu tava morrendo de nervoso.) Agora só faltam umas formalidades, porque namoro sério tem papelada, e você é a melhor parte dessa história. 😎💖</p>
     <button class="btn" id="to-contract">Bora pra papelada 📜</button>
   </section>
 
